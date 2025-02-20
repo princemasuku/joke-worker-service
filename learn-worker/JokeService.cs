@@ -2,6 +2,7 @@
 
 
 using learn_worker.Models;
+using System.Net.Http;
 
 namespace learn_worker
 {
@@ -9,21 +10,21 @@ namespace learn_worker
     {
         ILogger<JokeService> _logger;
         private readonly JokeServiceSettingsModel _jokeServiceSettings;
+        private readonly IHttpClientFactory _httpClient;
 
-        public JokeService(ILogger<JokeService> logger, JokeServiceSettingsModel jokeServiceSettings)
+        public JokeService(ILogger<JokeService> logger, JokeServiceSettingsModel jokeServiceSettings, IHttpClientFactory httpClient)
         {
-            _logger=logger;
-            _jokeServiceSettings=jokeServiceSettings;
+            _logger = logger;
+            _jokeServiceSettings = jokeServiceSettings;
+            _httpClient = httpClient;
         }
 
         public async Task<JokeResponseModel> GetJokeAsync()
         {
-            //var uri = "https://v2.jokeapi.dev/joke/Any?&type=twopart";
+            _logger.LogInformation("{method} called",nameof(GetJokeAsync));
             var returnedJoke = new JokeResponseModel();
-            HttpClient client = new HttpClient
-            {
-                BaseAddress = new Uri(_jokeServiceSettings.JokeEndpoint!)
-            };
+            var client = _httpClient.CreateClient();
+            client.BaseAddress = new Uri(_jokeServiceSettings.JokeEndpoint!);
             var joke = await client.GetAsync(SelectRandomCategory(_jokeServiceSettings.Categories!)+"?&type=twopart");
 
             if(joke.IsSuccessStatusCode)
@@ -42,5 +43,7 @@ namespace learn_worker
             var random = new Random();
             return categories[random.Next(categories.Count)];
         }
+
+        //public string 
     }
 }
