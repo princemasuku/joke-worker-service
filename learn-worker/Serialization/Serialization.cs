@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace learn_worker.Serialization
 {
-    public static class Serialization<T>
+    public static class Serialization<T> where T : class, new()
     {
 
-        public static T FromJson(string json) => JsonConvert.DeserializeObject<T>(json, Converter.Settings);
+        public static T FromJson(string json) => JsonConvert.DeserializeObject<T>(json, Converter.Settings) ?? new T();
         public static string ToJson(T self) => JsonConvert.SerializeObject(self, Converter.Settings);
     }
     internal static class Converter
